@@ -1,16 +1,16 @@
 package main
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
+	"github.com/bwmarrin/discordgo"
+	"io/ioutil"
 	"os"
 	"os/signal"
-	"syscall"
-	"github.com/bwmarrin/discordgo"
-	"fmt"
-	"bytes"
 	"strings"
+	"syscall"
 	"time"
-	"errors"
-	"io/ioutil"
 )
 
 /**
@@ -22,9 +22,9 @@ type Command func(*discordgo.Session, *discordgo.Message) string
  * The Raid structure holds all the required information for the raid itself
  */
 type Raid struct {
-	Type string
+	Type   string
 	Timing time.Time
-	Guild string
+	Guild  string
 }
 
 /**
@@ -38,9 +38,8 @@ func (r Raid) String() string {
 }
 
 var (
-	BotID string
-	GuildInvite string
-	raids map[string]map[string]Raid
+	BotID    string
+	raids    map[string]map[string]Raid
 	commands map[string]Command
 )
 
@@ -50,18 +49,18 @@ var (
  */
 func init() {
 	raids = make(map[string]map[string]Raid)
-	
+
 	commands = make(map[string]Command)
-	
+
 	commands["!raid"] = parseRaidCommand
 	commands["!help"] = showHelp
 	commands["!mutha"] = lando
-	commands["!towel"] = func(*discordgo.Session, *discordgo.Message) string {return "42"}
+	commands["!towel"] = func(*discordgo.Session, *discordgo.Message) string { return "42" }
 }
 
 func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
 	chunks := strings.Split(m.Content, " ")
-	
+
 	var buffer bytes.Buffer
 	if len(chunks) == 1 {
 		for _, guildRaids := range raids {
@@ -90,12 +89,12 @@ func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
 			}
 		} else {
 			buffer.Write([]byte("You can't do that"))
-		} 
+		}
 	} else if chunks[1] == "delete" {
 		channel, _ := s.Channel(m.ChannelID)
 		member, _ := s.GuildMember(channel.GuildID, m.Author.ID)
 		if canSetRaids(s, channel.GuildID, member.Roles) {
-			if len(chunks) < 4 || len(chunks) > 5{
+			if len(chunks) < 4 || len(chunks) > 5 {
 				buffer.Write([]byte("Wrong parameters, use !raid delete <us/eu> <raid_name>"))
 			} else {
 				delete(raids[chunks[2]], chunks[3])
@@ -107,7 +106,7 @@ func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
 }
 
 func setRaid(chunks []string) error {
-	if chunks[0] != "eu" && chunks [0] != "us" {
+	if chunks[0] != "eu" && chunks[0] != "us" {
 		return errors.New("Guild must be eu or us")
 	}
 	guild := chunks[0]
@@ -123,11 +122,11 @@ func setRaid(chunks []string) error {
 		raids[guild][raidType] = Raid{Guild: guild, Type: raidType, Timing: raidTime}
 	}
 	return err
-	
+
 }
 
 func canSetRaids(s *discordgo.Session, guildID string, roles []string) bool {
-	for _,role := range roles {
+	for _, role := range roles {
 		r, _ := s.State.Role(guildID, role)
 		if r.Name == "Inglorious Leaders" || r.Name == "Inglorious Officers" {
 			return true
@@ -137,7 +136,7 @@ func canSetRaids(s *discordgo.Session, guildID string, roles []string) bool {
 }
 
 func showHelp(s *discordgo.Session, m *discordgo.Message) string {
-	return "Type \"!raid\" to get the next timings for raids.\n" + "Type \"!raid eu\" to get the next timings for raids in the eu guild.\n" + "Type \"!raid us\" to get the next timings for raids in the us guild.\n" + "Type \"!mutha fuk'n LANDO\" to learn the TRUTH.\n";
+	return "Type \"!raid\" to get the next timings for raids.\n" + "Type \"!raid eu\" to get the next timings for raids in the eu guild.\n" + "Type \"!raid us\" to get the next timings for raids in the us guild.\n" + "Type \"!mutha fuk'n LANDO\" to learn the TRUTH.\n"
 }
 
 func lando(s *discordgo.Session, m *discordgo.Message) string {
@@ -149,7 +148,6 @@ func lando(s *discordgo.Session, m *discordgo.Message) string {
 	}
 }
 
-
 /**
  * Register URL
  * https://discordapp.com/oauth2/authorize?&client_id=256141864548302849&scope=bot&permissions=0
@@ -159,32 +157,32 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	//The readfile call will add a "\n" at the end of the string, so get rid of it.
-	discord, err := discordgo.New("Bot " + string(token[0:len(token) - 1]))
+	discord, err := discordgo.New("Bot " + string(token[0:len(token)-1]))
 	if err != nil {
 		fmt.Println("Error creating Discord session: ", err)
 		return
 	}
-	
+
 	u, err := discord.User("@me")
 	if err != nil {
 		fmt.Println("error obtaining user details, ", err)
 	}
 	BotID = u.ID
-	
+
 	discord.AddHandler(messageCreated)
-	
+
 	err = discord.Open()
 	defer discord.Close()
-	
+
 	if err != nil {
 		fmt.Println("Error opening Discord session: ", err)
 	}
 
 	fmt.Println("Bot is now running.")
 	fmt.Println("Press CTRL-C to exit.")
-	
+
 	// Simple way to keep program running until CTRL-C is pressed.
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
@@ -197,20 +195,20 @@ func messageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
 		sendMessage(s, m.ChannelID, "I'm not the droid you're looking for. Type \"!help\" for the available commands... and stop tagging me.")
 		return
 	}
-	
+
 	chunks := strings.Split(m.Content, " ")
 	if val, ok := commands[chunks[0]]; ok {
 		channel, _ := s.Channel(m.ChannelID)
 		fmt.Printf("received command %s on %s by %s\n", m.Content, channel.Name, m.Author.Username)
-		sendMessage(s, m.ChannelID, val(s,m.Message))
+		sendMessage(s, m.ChannelID, val(s, m.Message))
 	}
 }
 
 func botWasMentioned(m *discordgo.MessageCreate, u *discordgo.User) bool {
-	for _,user := range m.Mentions {
+	for _, user := range m.Mentions {
 		if user.ID == BotID {
 			return true
-		} 
+		}
 	}
 	return false
 }
