@@ -116,11 +116,11 @@ func setRaid(chunks []string) error {
 	raidType := strings.TrimSpace(strings.ToLower(chunks[1]))
 	when := strings.TrimSpace(strings.Join(chunks[2:], " "))
 	
-	var location time.Location
+	var location *time.Location
 	if(len(chunks) > 4) {
-		location, err := time.LoadLocation(chunks[4])
+		location, _ = time.LoadLocation(chunks[4])
 	} else {
-		location, err := time.LoadLocation("GMT")
+		location, _ = time.LoadLocation("GMT")
 	}
 	raidTime, err := time.ParseInLocation("2006-01-02 15:04 MST", when, location)
 	//Only set the new raid if there wasn't any error while parsing the date.
