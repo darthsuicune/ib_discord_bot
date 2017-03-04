@@ -28,11 +28,14 @@ func init() {
 	raids = make(map[string]map[string]Raid)
 
 	commands = make(map[string]Command)
-
+	
+	commands["!draid"] = parseDefaultRaidCommand
 	commands["!raid"] = parseRaidCommand
 	commands["!help"] = showHelp
 	commands["!mutha"] = lando
 	commands["!towel"] = func(*discordgo.Session, *discordgo.Message) string { return "42" }
+	commands["!shot_first"] = func(*discordgo.Session, *discordgo.Message) string { return "OF COURSE IT WAS HAN! This damn noobs..." }
+	commands["!friend"] = func(*discordgo.Session, *discordgo.Message) string { return "My friend doesn't like you. I don't like you either." }
 }
 
 /**
