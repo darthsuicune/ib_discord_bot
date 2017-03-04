@@ -117,3 +117,7 @@ func lando(s *discordgo.Session, m *discordgo.Message) string {
 		return "Learn your shit, it's !mutha fuk'n LANDO"
 	}
 }
+
+func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
+	
+}
