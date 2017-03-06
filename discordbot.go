@@ -25,14 +25,15 @@ var (
  * The "commands" array maps string commands to a function in charge of returning the actual values
  */
 func init() {
-	raids = make(map[string]map[string]Raid)
-
 	commands = make(map[string]Command)
-
+	
+	commands["!draid"] = parseDefaultRaidCommand
 	commands["!raid"] = parseRaidCommand
 	commands["!help"] = showHelp
 	commands["!mutha"] = lando
 	commands["!towel"] = func(*discordgo.Session, *discordgo.Message) string { return "42" }
+	commands["!shot_first"] = func(*discordgo.Session, *discordgo.Message) string { return "OF COURSE IT WAS HAN! This damn noobs..." }
+	commands["!friend"] = func(*discordgo.Session, *discordgo.Message) string { return "My friend doesn't like you. I don't like you either." }
 }
 
 /**
@@ -118,6 +119,28 @@ func lando(s *discordgo.Session, m *discordgo.Message) string {
 	}
 }
 
+func parseDefaultRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
+	if !canSetRaids(s, m) {
+		return "Nope"
+	}
+	return setDefaultRaid(m.Content)
+}
+
 func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
-	
+	return readRaidCommand(m.Content, canSetRaids(s, m))
+}
+
+func canSetRaids(s *discordgo.Session, m *discordgo.Message) bool {
+	channel, _ := s.Channel(m.ChannelID)
+	guildID := channel.GuildID
+	member, _ := s.GuildMember(guildID, m.Author.ID)
+	roles := member.Roles
+		
+	for _, role := range roles {
+		r, _ := s.State.Role(guildID, role)
+		if r.Name == "Inglorious Leaders" || r.Name == "Inglorious Officers" {
+			return true
+		}
+	}
+	return false
 }

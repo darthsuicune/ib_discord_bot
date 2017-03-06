@@ -26,7 +26,7 @@ func (r Rancor) Times() []string {
 }
 
 func (r Rancor) String() string {
-	return ""
+	return strings.Join(r.Times(),"\n")
 }
 
 type Tank struct {
@@ -59,7 +59,7 @@ func (t Tank) Times() []string {
 }
 
 func (t Tank) String() string {
-	return ""
+	return strings.Join(t.Times(),"\n")
 }
 
 func timeTilEvent(when time.Time) string {

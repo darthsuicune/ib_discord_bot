@@ -46,7 +46,7 @@ func (g *Guild) SetRancor(startTime time.Time) {
 }
 
 func (g *Guild) SetDefaultEURancor(startTime time.Time) {
-	newTime := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 20, 0, 0, 0, usTime())
+	newTime := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 20, 0, 0, 0, euTime())
 	g.SetRancor(newTime)
 }
 
@@ -60,7 +60,7 @@ func (g *Guild) SetUSTank(startTime time.Time) {
 }
 
 func (g *Guild) SetDefaultEUTank(startTime time.Time) {
-	newTime := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 21, 0, 0, 0, usTime())
+	newTime := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 21, 0, 0, 0, euTime())
 	g.SetEUTank(newTime)
 }
 

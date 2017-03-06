@@ -36,6 +36,11 @@ func TestSetDefaultUSRancor(t *testing.T) {
 	}
 }
 
+func trimTime(timing string) string {
+	mark := strings.LastIndex(timing, "m") + 1
+	return timing[:mark]
+}
+
 func TestSetUSRancor(t *testing.T) {
 	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
 	g.SetRancor(timing)
@@ -73,11 +78,6 @@ func TestSetDefaultUSTank(t *testing.T) {
 	}
 }
 
-func trimTime(timing string) string {
-	mark := strings.LastIndex(timing, "m") + 1
-	return timing[:mark]
-}
-
 func TestSetUSTank(t *testing.T) {
 	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
 	g.SetUSTank(timing)
@@ -98,8 +98,106 @@ func TestSetUSTank(t *testing.T) {
 
 func TestSetDefaultEURancor(t *testing.T) {
 	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
-	expectedTiming := time.Date(2006, 1, 2, 20, 30, 0, 0, euTime())
+	expectedTiming := time.Date(2006, 1, 2, 20, 0, 0, 0, euTime())
+	g.SetDefaultEURancor(timing)
+	
+	rancor := g.Rancor.Times()
+	if len(rancor) != 2 {
+		t.Error("baaad result: " + strings.Join(rancor, ", "))
+	}
+	expectedStart := trimTime(expectedTiming.Sub(time.Now()).String())
+	if rancor[0] != fmt.Sprintf("Rancor in **%s**", expectedStart) {
+		t.Error("Wrong start time: " + rancor[0] + ", expected: " + expectedStart)
+	}
+	expectedFfa := trimTime(expectedTiming.Add(24 * time.Hour).Sub(time.Now()).String())
+	if rancor[1] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
+		t.Error("Wrong ffa time: " + rancor[1] + ", expected: " + expectedFfa)
+	}
 }
-func TestSetEURancor(t *testing.T) {}
-func TestSetDefaultEUTank(t *testing.T) {}
-func TestSetEUTank(t *testing.T) {}
+
+func TestSetEURancor(t *testing.T) {
+	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
+	g.SetRancor(timing)
+
+	rancor := g.Rancor.Times()
+	if len(rancor) != 2 {
+		t.Error("baaad result: " + strings.Join(rancor, ", "))
+	}
+	expectedStart := trimTime(timing.Sub(time.Now()).String())
+	if rancor[0] != fmt.Sprintf("Rancor in **%s**", expectedStart) {
+		t.Error("Wrong start time: " + rancor[0] + ", expected: " + expectedStart)
+	}
+	expectedFfa := trimTime(timing.Add(24 * time.Hour).Sub(time.Now()).String())
+	if rancor[1] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
+		t.Error("Wrong ffa time: " + rancor[1] + ", expected: " + expectedFfa)
+	}
+}
+
+func TestSetDefaultEUTank(t *testing.T) {
+	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
+	expectedStartTime := time.Date(2006, 1, 2, 21, 0, 0, 0, euTime())
+	expectedP2Time := expectedStartTime.Add(10*time.Hour)
+	expectedP3Time := expectedStartTime.Add(34*time.Hour)
+	expectedP4Time := expectedStartTime.Add(44*time.Hour)
+	expectedFfaTime := expectedStartTime.Add(46*time.Hour)
+	g.SetDefaultEUTank(timing)
+
+	tank := g.Tank.Times()
+	if len(tank) != 5 {
+		t.Error("baaad result: " + strings.Join(tank, ", "))
+	}
+	expectedStart := trimTime(expectedStartTime.Sub(time.Now()).String())
+	if tank[0] != fmt.Sprintf("Tank in **%s**", expectedStart) {
+		t.Error("Wrong start time: " + tank[0] + ", expected: " + expectedStart)
+	}
+	expectedP2 := trimTime(expectedP2Time.Sub(time.Now()).String())
+	if tank[1] != fmt.Sprintf("Phase 2 in **%s**", expectedP2) {
+		t.Error("Wrong phase 2 time: " + tank[1] + ", expected: " + expectedP2)
+	}
+	expectedP3 := trimTime(expectedP3Time.Sub(time.Now()).String())
+	if tank[2] != fmt.Sprintf("Phase 3 in **%s**", expectedP3) {
+		t.Error("Wrong phase 3 time: " + tank[2] + ", expected: " + expectedP3)
+	}
+	expectedP4 := trimTime(expectedP4Time.Sub(time.Now()).String())
+	if tank[3] != fmt.Sprintf("Phase 4 in **%s**", expectedP4) {
+		t.Error("Wrong phase 4 time: " + tank[3] + ", expected: " + expectedP4)
+	}
+	expectedFfa := trimTime(expectedFfaTime.Sub(time.Now()).String())
+	if tank[4] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
+		t.Error("Wrong ffa time: " + tank[4] + ", expected: " + expectedFfa)
+	}
+}
+
+func TestSetEUTank(t *testing.T) {
+	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
+	expectedP2Time := timing.Add(10*time.Hour)
+	expectedP3Time := timing.Add(34*time.Hour)
+	expectedP4Time := timing.Add(44*time.Hour)
+	expectedFfaTime := timing.Add(46*time.Hour)
+	g.SetEUTank(timing)
+
+	tank := g.Tank.Times()
+	if len(tank) != 5 {
+		t.Error("baaad result: " + strings.Join(tank, ", "))
+	}
+	expectedStart := trimTime(timing.Sub(time.Now()).String())
+	if tank[0] != fmt.Sprintf("Tank in **%s**", expectedStart) {
+		t.Error("Wrong start time: " + tank[0] + ", expected: " + expectedStart)
+	}
+	expectedP2 := trimTime(expectedP2Time.Sub(time.Now()).String())
+	if tank[1] != fmt.Sprintf("Phase 2 in **%s**", expectedP2) {
+		t.Error("Wrong phase 2 time: " + tank[1] + ", expected: " + expectedP2)
+	}
+	expectedP3 := trimTime(expectedP3Time.Sub(time.Now()).String())
+	if tank[2] != fmt.Sprintf("Phase 3 in **%s**", expectedP3) {
+		t.Error("Wrong phase 3 time: " + tank[2] + ", expected: " + expectedP3)
+	}
+	expectedP4 := trimTime(expectedP4Time.Sub(time.Now()).String())
+	if tank[3] != fmt.Sprintf("Phase 4 in **%s**", expectedP4) {
+		t.Error("Wrong phase 4 time: " + tank[3] + ", expected: " + expectedP4)
+	}
+	expectedFfa := trimTime(expectedFfaTime.Sub(time.Now()).String())
+	if tank[4] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
+		t.Error("Wrong ffa time: " + tank[4] + ", expected: " + expectedFfa)
+	}
+}
