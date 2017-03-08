@@ -58,13 +58,13 @@ func readRaidCommand(s string, canSetRaids bool) string {
 			return "Nope"
 		}
 		var buffer bytes.Buffer
-		switch chunks[2] {
+		switch chunks[1] {
 		case "set":
-
+			return setCustomRaid(chunks[2:])
 		case "delete":
-
+			return deleteCustomRaid(chunks[2:])
 		default:
-			return "Your training is not complete yet. You must go to Dagobah."
+			return "Your training is not complete yet. You must head to planet Dagobah."
 		}
 		return buffer.String()
 	}
@@ -80,6 +80,13 @@ func fullRaidInformation() string {
 	return buffer.String()
 }
 
+func setCustomRaid(s []string) string {
+	return ""
+}
+
+func deleteCustomRaid(s []string) string {
+	return ""
+}
 /**
  * Raid command should be
  * !draid eu/us <type> <date>

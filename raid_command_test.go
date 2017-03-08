@@ -135,9 +135,30 @@ func TestRaidSetReturnsNopeWithoutPermissions(t *testing.T) {
 }
 
 func TestRaidSetsUpTheRightValue(t *testing.T) {
-	command := "!raid set eu tank 2012-12-13 01:02:03 GMT"
+	command := fmt.Sprintf("!raid set eu tank %d-12-13 01:02:03 GMT", raidYear)
+	expectedTiming := time.Date(raidYear, 12, 13, 1, 2, 3, 0, euTime())
+
+	expectedP2 := expectedTiming.Add(10 * time.Hour)
+	expectedP3 := expectedTiming.Add(34 * time.Hour)
+	expectedP4 := expectedTiming.Add(44 * time.Hour)
+	expectedFfa := expectedTiming.Add(46 * time.Hour)
 
 	readRaidCommand(command, true)
+
+	if guilds[EU].Tank.StartTime != expectedTiming &&
+		guilds[EU].Tank.Phase2 != expectedP2 &&
+		guilds[EU].Tank.Phase3 != expectedP3 &&
+		guilds[EU].Tank.Phase4 != expectedP4 &&
+		guilds[EU].Tank.Ffa != expectedFfa {
+		t.Error("Something went very wrong. Current info: Raid starts on " + guilds[EU].Tank.StartTime.String())
+	}
+	//expectedResponse := fmt.Sprintf("**EU** Tank in %s\nPhase 2 in %s\nPhase 3 in %s\nPhase 4 in %s\nFFA in %s",
+	//	expectedTiming.Sub(time.Now()), expectedP2.Sub(time.Now()), expectedP3.Sub(time.Now()),
+	//	expectedP4.Sub(time.Now()), expectedFfa.Sub(time.Now()))
+	//
+	//if res != expectedResponse {
+	//	t.Error(res)
+	//}
 }
 
 func TestDeleteRaidRemovesTheCurrentRaid(t *testing.T) {
