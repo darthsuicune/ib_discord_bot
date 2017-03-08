@@ -74,8 +74,8 @@ func main() {
 	// Simple way to keep program running until CTRL-C is pressed.
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	fmt.Println("Shutting down now. Cya")
 	<-sc
+	fmt.Println("Shutting down now. Cya")
 }
 
 func messageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
