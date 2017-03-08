@@ -8,18 +8,34 @@ import (
 )
 
 var g *Guild
+var testYear = time.Now().Add(366 * 24 * time.Hour).Year()
 
 func init() {
-	g = &Guild{}
+	g = createGuild()
 }
 
 func createGuild() *Guild {
 	return &Guild{}
 }
 
-func TestSetDefaultUSRancor(t *testing.T) {
+func TestRaidFinished(t *testing.T) {
 	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
-	expectedTiming := time.Date(2006, 1, 2, 20, 30, 0, 0, usTime())
+
+	g.SetDefaultUSRancor(timing)
+
+	r := g.Rancor.Times()
+	if len(r) > 1 {
+		t.Error("Nope")
+	} else {
+		if !strings.Contains(r[0], "finished") {
+			t.Error("Tampocoe")
+		}
+	}
+}
+
+func TestSetDefaultUSRancor(t *testing.T) {
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, usTime())
+	expectedTiming := time.Date(testYear, 1, 2, 20, 30, 0, 0, usTime())
 	g.SetDefaultUSRancor(timing)
 
 	rancor := g.Rancor.Times()
@@ -42,7 +58,7 @@ func trimTime(timing string) string {
 }
 
 func TestSetUSRancor(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, usTime())
 	g.SetRancor(timing)
 
 	rancor := g.Rancor.Times()
@@ -60,8 +76,8 @@ func TestSetUSRancor(t *testing.T) {
 }
 
 func TestSetDefaultUSTank(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
-	expectedTiming := time.Date(2006, 1, 2, 22, 0, 0, 0, usTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, usTime())
+	expectedTiming := time.Date(testYear, 1, 2, 22, 0, 0, 0, usTime())
 	g.SetDefaultUSTank(timing)
 
 	tank := g.Tank.Times()
@@ -79,7 +95,7 @@ func TestSetDefaultUSTank(t *testing.T) {
 }
 
 func TestSetUSTank(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, usTime())
 	g.SetUSTank(timing)
 
 	tank := g.Tank.Times()
@@ -97,8 +113,8 @@ func TestSetUSTank(t *testing.T) {
 }
 
 func TestSetDefaultEURancor(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
-	expectedTiming := time.Date(2006, 1, 2, 20, 0, 0, 0, euTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, euTime())
+	expectedTiming := time.Date(testYear, 1, 2, 20, 0, 0, 0, euTime())
 	g.SetDefaultEURancor(timing)
 	
 	rancor := g.Rancor.Times()
@@ -116,7 +132,7 @@ func TestSetDefaultEURancor(t *testing.T) {
 }
 
 func TestSetEURancor(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, euTime())
 	g.SetRancor(timing)
 
 	rancor := g.Rancor.Times()
@@ -134,8 +150,8 @@ func TestSetEURancor(t *testing.T) {
 }
 
 func TestSetDefaultEUTank(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
-	expectedStartTime := time.Date(2006, 1, 2, 21, 0, 0, 0, euTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, euTime())
+	expectedStartTime := time.Date(testYear, 1, 2, 21, 0, 0, 0, euTime())
 	expectedP2Time := expectedStartTime.Add(10*time.Hour)
 	expectedP3Time := expectedStartTime.Add(34*time.Hour)
 	expectedP4Time := expectedStartTime.Add(44*time.Hour)
@@ -169,7 +185,7 @@ func TestSetDefaultEUTank(t *testing.T) {
 }
 
 func TestSetEUTank(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, euTime())
+	timing := time.Date(testYear, 1, 2, 15, 04, 05, 0, euTime())
 	expectedP2Time := timing.Add(10*time.Hour)
 	expectedP3Time := timing.Add(34*time.Hour)
 	expectedP4Time := timing.Add(44*time.Hour)

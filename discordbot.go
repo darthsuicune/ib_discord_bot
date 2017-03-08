@@ -79,8 +79,7 @@ func main() {
 }
 
 func messageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
-	u, _ := s.User("@me")
-	if botWasMentioned(m, u) {
+	if botWasMentioned(m) {
 		sendMessage(s, m.ChannelID, "I'm not the droid you're looking for. Type \"!help\" for the available commands... and stop tagging me.")
 		return
 	}
@@ -93,7 +92,7 @@ func messageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 }
 
-func botWasMentioned(m *discordgo.MessageCreate, u *discordgo.User) bool {
+func botWasMentioned(m *discordgo.MessageCreate) bool {
 	for _, user := range m.Mentions {
 		if user.ID == BotID {
 			return true

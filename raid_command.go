@@ -17,14 +17,18 @@ const (
 	TMZ = 4
 	
 	DATE_FORMAT = "2006-01-02"
+	
+	EU = "eu"
+	US = "us"
+
+	RANCOR = "rancor"
+	TANK = "tank"
 )
 
 func init() {
 	guilds = make(map[string]*Guild)
-	eu := Guild{}
-	us := Guild{}
-	guilds["eu"] = &eu
-	guilds["us"] = &us
+	guilds[EU] = &Guild{}
+	guilds[US] = &Guild{}
 }
 
 /**
@@ -39,28 +43,39 @@ func readRaidCommand(s string, canSetRaids bool) string {
 	if len(chunks) == 1 {
 		return fullRaidInformation()
 	}
-	return parseChunks(chunks[1:])
+	if len(chunks) == 2 {
+		var buffer bytes.Buffer
+		guild := strings.ToLower(chunks[1])
+		if guild != EU && guild != US {
+			buffer.WriteString("You f\\*\\*\\*ing moron")
+		} else {
+			buffer.WriteString(fmt.Sprintf("**%s** %s", strings.ToUpper(guild), guilds[guild].Raids()))
+		}
+		return buffer.String()
+	}
+	if len(chunks) > 2 {
+		if !canSetRaids {
+			return "Nope"
+		}
+		var buffer bytes.Buffer
+		switch chunks[2] {
+		case "set":
+
+		case "delete":
+
+		default:
+			return "Your training is not complete yet. You must go to Dagobah."
+		}
+		return buffer.String()
+	}
+	return "Wait, wat?"
 }
 
 func fullRaidInformation() string {
 	var buffer bytes.Buffer
-	for _, guild := range guilds {
-		buffer.Write([]byte(guild.Rancor.String()))
-		buffer.Write([]byte(guild.Tank.String()))
-	}
-	return buffer.String()
-}
-
-func parseChunks(chunks []string) string {
-	var buffer bytes.Buffer
-	if len(chunks) == 1 {
-		guild := strings.ToLower(chunks[GUILD])
-		if guild != "eu" && guild != "us" {
-			buffer.Write([]byte("You f\\*\\*\\*ing moron"))
-		} else {
-			buffer.Write([]byte(guilds[guild].Rancor.String()))
-			buffer.Write([]byte(guilds[guild].Tank.String()))
-		}
+	for guildCode, guild := range guilds {
+		buffer.WriteString(fmt.Sprintf("**%s** ", strings.ToUpper(guildCode)))
+		buffer.WriteString(guild.Raids())
 	}
 	return buffer.String()
 }
@@ -76,7 +91,7 @@ func setDefaultRaid(s string) string {
 	}
 	request := chunks[1:]
 	guild := strings.ToLower(request[GUILD])
-	if guild != "eu" && guild != "us" {
+	if guild != EU && guild != US {
 		return "You moron"
 	}
 	raidType := strings.ToLower(request[RAID])
@@ -98,11 +113,11 @@ func createDefaultRancor(guild string, dateString string) string {
 	var date time.Time
 	var err error
 	
-	switch(guild) {
-		case "eu":
+	switch guild {
+		case EU:
 			date, err = time.ParseInLocation(DATE_FORMAT, dateString, euTime())
 			guilds[guild].SetDefaultEURancor(date)
-		case "us":
+		case US:
 			date, err = time.ParseInLocation(DATE_FORMAT, dateString, usTime())
 			guilds[guild].SetDefaultUSRancor(date)
 	}
@@ -116,11 +131,11 @@ func createDefaultTank(guild string, dateString string) string {
 	var date time.Time
 	var err error
 	
-	switch(guild) {
-		case "eu":
+	switch guild {
+		case EU:
 			date, err = time.ParseInLocation(DATE_FORMAT, dateString, euTime())
 			guilds[guild].SetDefaultEUTank(date)
-		case "us":
+		case US:
 			date, err = time.ParseInLocation(DATE_FORMAT, dateString, usTime())
 			guilds[guild].SetDefaultUSTank(date)
 	}

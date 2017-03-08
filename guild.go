@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"time"
+	"bytes"
 )
 
 type Guild struct {
@@ -66,4 +67,13 @@ func (g *Guild) SetDefaultEUTank(startTime time.Time) {
 
 func (g *Guild) SetEUTank(startTime time.Time) {
 	g.Tank = Tank{StartTime: startTime, Phase2: startTime.Add(10 * time.Hour), Phase3: startTime.Add(34 * time.Hour), Phase4: startTime.Add(44 * time.Hour), Ffa: startTime.Add(46 * time.Hour)}
+}
+
+func (g *Guild) Raids() string {
+	var buffer bytes.Buffer
+	buffer.WriteString(g.Rancor.String())
+	buffer.WriteString("\n")
+	buffer.WriteString(g.Tank.String())
+	buffer.WriteString("\n")
+	return buffer.String()
 }
