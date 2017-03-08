@@ -7,8 +7,8 @@ import (
 )
 
 type Guild struct {
-	Rancor Rancor
-	Tank   Tank
+	Rancor *Rancor
+	Tank   *Tank
 }
 
 /**
@@ -43,7 +43,7 @@ func (g *Guild) SetDefaultUSRancor(startTime time.Time) {
 }
 
 func (g *Guild) SetRancor(startTime time.Time) {
-	g.Rancor = Rancor{StartTime: startTime, Ffa: startTime.Add(24 * time.Hour)}
+	g.Rancor = &Rancor{StartTime: startTime, Ffa: startTime.Add(24 * time.Hour)}
 }
 
 func (g *Guild) SetDefaultEURancor(startTime time.Time) {
@@ -57,7 +57,7 @@ func (g *Guild) SetDefaultUSTank(startTime time.Time) {
 }
 
 func (g *Guild) SetUSTank(startTime time.Time) {
-	g.Tank = Tank{StartTime: startTime, Phase2: startTime, Phase3: startTime, Phase4: startTime, Ffa: startTime.Add(46 * time.Hour)}
+	g.Tank = &Tank{StartTime: startTime, Phase2: startTime, Phase3: startTime, Phase4: startTime, Ffa: startTime.Add(46 * time.Hour)}
 }
 
 func (g *Guild) SetDefaultEUTank(startTime time.Time) {
@@ -66,14 +66,26 @@ func (g *Guild) SetDefaultEUTank(startTime time.Time) {
 }
 
 func (g *Guild) SetEUTank(startTime time.Time) {
-	g.Tank = Tank{StartTime: startTime, Phase2: startTime.Add(10 * time.Hour), Phase3: startTime.Add(34 * time.Hour), Phase4: startTime.Add(44 * time.Hour), Ffa: startTime.Add(46 * time.Hour)}
+	g.Tank = &Tank{StartTime: startTime, Phase2: startTime.Add(10 * time.Hour), Phase3: startTime.Add(34 * time.Hour), Phase4: startTime.Add(44 * time.Hour), Ffa: startTime.Add(46 * time.Hour)}
+}
+
+func (g *Guild) DeleteTank() {
+	g.Tank = nil
+}
+
+func (g *Guild) DeleteRancor() {
+	g.Rancor = nil
 }
 
 func (g *Guild) Raids() string {
 	var buffer bytes.Buffer
-	buffer.WriteString(g.Rancor.String())
-	buffer.WriteString("\n")
-	buffer.WriteString(g.Tank.String())
-	buffer.WriteString("\n")
+	if g.Rancor != nil {
+		buffer.WriteString(g.Rancor.String())
+		buffer.WriteString("\n")
+	}
+	if g.Tank != nil {
+		buffer.WriteString(g.Tank.String())
+		buffer.WriteString("\n")
+	}
 	return buffer.String()
 }
