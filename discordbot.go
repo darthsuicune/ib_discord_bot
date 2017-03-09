@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"bytes"
 )
 
 /**
@@ -18,6 +19,13 @@ type Command func(*discordgo.Session, *discordgo.Message) string
 var (
 	BotID    string
 	commands map[string]Command
+
+	guilds map[string]*Guild
+)
+
+const (
+	TOKEN_FILE_NAME = "token.txt"
+	RAIDS_FILE_NAME = "raids.txt"
 )
 
 /**
@@ -34,6 +42,10 @@ func init() {
 	commands["!towel"] = func(*discordgo.Session, *discordgo.Message) string { return "42" }
 	commands["!shot_first"] = func(*discordgo.Session, *discordgo.Message) string { return "OF COURSE IT WAS HAN! This damn noobs..." }
 	commands["!friend"] = func(*discordgo.Session, *discordgo.Message) string { return "My friend doesn't like you. I don't like you either." }
+
+	guilds = make(map[string]*Guild)
+	guilds[EU] = &Guild{}
+	guilds[US] = &Guild{}
 }
 
 /**
@@ -41,17 +53,9 @@ func init() {
  * https://discordapp.com/oauth2/authorize?&client_id=256141864548302849&scope=bot&permissions=0
  */
 func main() {
-	token, err := ioutil.ReadFile("token.txt")
-	if err != nil {
-		panic(err)
-	}
+	discord := startSession()
 
-	//The readfile call will add a "\n" at the end of the string, so get rid of it.
-	discord, err := discordgo.New("Bot " + string(token[0:len(token)-1]))
-	if err != nil {
-		fmt.Println("Error creating Discord session: ", err)
-		return
-	}
+	loadSavedData()
 
 	u, err := discord.User("@me")
 	if err != nil {
@@ -59,7 +63,7 @@ func main() {
 	}
 	BotID = u.ID
 
-	discord.AddHandler(messageCreated)
+	discord.AddHandler(onMessageCreated)
 
 	err = discord.Open()
 	defer discord.Close()
@@ -69,16 +73,56 @@ func main() {
 	}
 
 	fmt.Println("Bot is now running.")
-	fmt.Println("Press CTRL-C to exit.")
 
-	// Simple way to keep program running until CTRL-C is pressed.
+	// Simple way to keep program running until any kill signal is received (including ctrl + c).
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	fmt.Println("Shutting down now. Cya")
+	err = saveData()
+	if err == nil {
+		fmt.Println("Data saved. Shutting down now. Cya")
+	} else {
+		fmt.Println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+	}
+}
+func saveData() error {
+	for _, guild := range guilds {
+		err := ioutil.WriteFile(RAIDS_FILE_NAME, guild.Save(), os.ModeAppend)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func messageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
+func loadSavedData() {
+	oldRaids, err := ioutil.ReadFile(RAIDS_FILE_NAME)
+	if err != nil {
+		fmt.Println("No old raids were found.")
+	}
+	if oldRaids != nil {
+		raids := strings.Split(fmt.Sprintf("%s", oldRaids), "\n")
+		for _, raid := range raids {
+			readRaidCommand(raid, true)
+		}
+	}
+}
+
+func startSession() *discordgo.Session {
+	token, err := ioutil.ReadFile("token.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	//The readfile call will add a "\n" at the end of the string, so get rid of it.
+	discord, err := discordgo.New("Bot " + string(token[0:len(token)-1]))
+	if err != nil {
+		panic(err)
+	}
+	return discord
+}
+
+func onMessageCreated(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if botWasMentioned(m) {
 		sendMessage(s, m.ChannelID, "I'm not the droid you're looking for. Type \"!help\" for the available commands... and stop tagging me.")
 		return

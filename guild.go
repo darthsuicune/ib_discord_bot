@@ -89,3 +89,7 @@ func (g *Guild) Raids() string {
 	}
 	return buffer.String()
 }
+
+func (g *Guild) Save() []byte {
+
+}

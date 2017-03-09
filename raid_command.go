@@ -7,8 +7,6 @@ import (
 	"time"
 )
 
-var guilds map[string]*Guild
-
 const (
 	GUILD = 0
 	RAID  = 1
@@ -24,12 +22,6 @@ const (
 	RANCOR = "rancor"
 	TANK   = "tank"
 )
-
-func init() {
-	guilds = make(map[string]*Guild)
-	guilds[EU] = &Guild{}
-	guilds[US] = &Guild{}
-}
 
 /**
  * Raid command should be any of:
