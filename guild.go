@@ -91,5 +91,5 @@ func (g *Guild) Raids() string {
 }
 
 func (g *Guild) Save() []byte {
-
+	return nil
 }
