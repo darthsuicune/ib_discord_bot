@@ -4,11 +4,32 @@ import (
 	"fmt"
 	"time"
 	"bytes"
+	"strings"
 )
+
+type Guilds struct {
+	Eu *Guild
+	Us *Guild
+}
+
+func (g *Guilds) Raids() string {
+	return fmt.Sprintf("**%s**\n%s\n**%s**\n%s", "EU", g.Eu.Raids(), "US", g.Us.Raids())
+}
+
+func (g *Guilds) Guild(code string) *Guild {
+	if strings.ToLower(code) == EU {
+		return guilds.Eu
+	} else if strings.ToLower(code) == US {
+		return guilds.Us
+	} else {
+		panic("WHAT THE FUCK DID YOU DO!")
+	}
+}
 
 type Guild struct {
 	Rancor *Rancor
 	Tank   *Tank
+	Location *time.Location
 }
 
 /**
@@ -88,8 +109,4 @@ func (g *Guild) Raids() string {
 		buffer.WriteString("\n")
 	}
 	return buffer.String()
-}
-
-func (g *Guild) Save() []byte {
-	return nil
 }

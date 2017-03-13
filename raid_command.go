@@ -33,7 +33,7 @@ const (
 func readRaidCommand(s string, canSetRaids bool) string {
 	chunks := strings.Split(s, " ")
 	if len(chunks) == 1 {
-		return fullRaidInformation()
+		return guilds.Raids()
 	}
 	if len(chunks) == 2 {
 		var buffer bytes.Buffer
@@ -41,7 +41,7 @@ func readRaidCommand(s string, canSetRaids bool) string {
 		if guild != EU && guild != US {
 			buffer.WriteString("You f\\*\\*\\*ing moron")
 		} else {
-			buffer.WriteString(fmt.Sprintf("**%s** %s", strings.ToUpper(guild), guilds[guild].Raids()))
+			buffer.WriteString(fmt.Sprintf("**%s**\n%s", strings.ToUpper(guild), guilds.Guild(guild).Raids()))
 		}
 		return buffer.String()
 	}
@@ -68,67 +68,54 @@ func readRaidCommand(s string, canSetRaids bool) string {
 	return "Wait, wat?"
 }
 
-func fullRaidInformation() string {
-	var buffer bytes.Buffer
-	for guildCode, guild := range guilds {
-		buffer.WriteString(fmt.Sprintf("**%s** ", strings.ToUpper(guildCode)))
-		buffer.WriteString(guild.Raids())
-	}
-	return buffer.String()
-}
-
 func setCustomRaid(s []string) string {
-	guild := s[GUILD]
+	g := s[GUILD]
 	raidType := s[RAID]
 	date := s[DATE]
 	timing := s[TIME]
 	tmz := s[TMZ]
 
-	if guild != EU && guild != US {
+	if g != EU && g != US {
 		return "You're an idiot. Only the EU and US exist, the rest of the world doesn't."
 	}
 	if raidType != RANCOR && raidType != TANK {
 		return "Only rancors and tanks m8. The FBI might raid your home to search for those drugs tho."
 	}
+
 	fullTiming := fmt.Sprintf("%s %s %s", date, timing, tmz)
 
-	var location *time.Location
-	switch guild {
-	case EU:
-		location = euTime()
-	case US:
-		location = usTime()
-	}
-	startTime, err := time.ParseInLocation("2006-01-02 03:04:05 MST", fullTiming, location)
+	guild := guilds.Guild(g)
+	startTime, err := time.ParseInLocation("2006-01-02 15:04 MST", fullTiming, guild.Location)
 	if err != nil {return err.Error()}
 	switch raidType {
 	case RANCOR:
-		guilds[guild].SetRancor(startTime)
+		guild.SetRancor(startTime)
 	case TANK:
-		if guild == EU {
-			guilds[guild].SetEUTank(startTime)
+		if g == EU {
+			guild.SetEUTank(startTime)
 		} else {
-			guilds[guild].SetUSTank(startTime)
+			guild.SetUSTank(startTime)
 		}
 	}
 	return "Get your lightswords ready. The Rancor will appear " + formatTime(timeTilEvent(startTime))
 }
 
 func deleteRaid(s []string) string {
-	guild := s[GUILD]
+	g := s[GUILD]
 	raidType := s[RAID]
 
-	if guild != EU && guild != US {
+	if g != EU && g != US {
 		return "You're an idiot. Only the EU and US exist, the rest of the world doesn't."
 	}
 	if raidType != RANCOR && raidType != TANK {
 		return "Only rancors and tanks m8. The FBI might raid your home to search for those drugs tho."
 	}
+	guild := guilds.Guild(g)
 	switch raidType {
 	case RANCOR:
-		guilds[guild].DeleteRancor()
+		guild.DeleteRancor()
 	case TANK:
-		guilds[guild].DeleteTank()
+		guild.DeleteTank()
 	}
 	return fmt.Sprintf("That %s was not the one you were looking for", raidType)
 }
@@ -154,46 +141,41 @@ func setDefaultRaid(s string) string {
 	date := request[DATE]
 	var res string
 	switch raidType {
-	case "rancor":
+	case RANCOR:
 		res = createDefaultRancor(guild, date)
-	case "tank":
+	case TANK:
 		res = createDefaultTank(guild, date)
 	}
 	return fmt.Sprintf("%s", res)
 }
 
-func createDefaultRancor(guild string, dateString string) string {
-	var date time.Time
-	var err error
-
-	switch guild {
+func createDefaultRancor(g string, dateString string) string {
+	guild := guilds.Guild(g)
+	date, err := time.ParseInLocation(DATE_FORMAT, dateString, guild.Location)
+	switch g {
 	case EU:
-		date, err = time.ParseInLocation(DATE_FORMAT, dateString, euTime())
-		guilds[guild].SetDefaultEURancor(date)
+		guild.SetDefaultEURancor(date)
 	case US:
-		date, err = time.ParseInLocation(DATE_FORMAT, dateString, usTime())
-		guilds[guild].SetDefaultUSRancor(date)
+		guild.SetDefaultUSRancor(date)
 	}
 	if err != nil {
 		return fmt.Sprintf("Error while creating date: %s", err.Error())
 	}
-	return guilds[guild].Rancor.String()
+	return guild.Rancor.String()
 }
 
-func createDefaultTank(guild string, dateString string) string {
-	var date time.Time
-	var err error
+func createDefaultTank(g string, dateString string) string {
+	guild := guilds.Guild(g)
 
-	switch guild {
+	date, err := time.ParseInLocation(DATE_FORMAT, dateString, guild.Location)
+	switch g {
 	case EU:
-		date, err = time.ParseInLocation(DATE_FORMAT, dateString, euTime())
-		guilds[guild].SetDefaultEUTank(date)
+		guild.SetDefaultEUTank(date)
 	case US:
-		date, err = time.ParseInLocation(DATE_FORMAT, dateString, usTime())
-		guilds[guild].SetDefaultUSTank(date)
+		guild.SetDefaultUSTank(date)
 	}
 	if err != nil {
 		return fmt.Sprintf("Error while creating date: %s", err.Error())
 	}
-	return guilds[guild].Tank.String()
+	return guild.Tank.String()
 }

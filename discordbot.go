@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+	"encoding/json"
 )
 
 /**
@@ -15,11 +16,12 @@ import (
  */
 type Command func(*discordgo.Session, *discordgo.Message) string
 
+
 var (
 	BotID    string
 	commands map[string]Command
 
-	guilds map[string]*Guild
+	guilds *Guilds
 )
 
 const (
@@ -42,9 +44,7 @@ func init() {
 	commands["!shot_first"] = func(*discordgo.Session, *discordgo.Message) string { return "OF COURSE IT WAS HAN! This damn noobs..." }
 	commands["!friend"] = func(*discordgo.Session, *discordgo.Message) string { return "My friend doesn't like you. I don't like you either." }
 
-	guilds = make(map[string]*Guild)
-	guilds[EU] = &Guild{}
-	guilds[US] = &Guild{}
+	guilds = &Guilds{Eu: &Guild{Location: euTime()}, Us: &Guild{Location: usTime()}}
 }
 
 /**
@@ -54,7 +54,7 @@ func init() {
 func main() {
 	discord := startSession()
 
-	loadSavedData()
+	loadSavedState()
 
 	u, err := discord.User("@me")
 	if err != nil {
@@ -77,34 +77,34 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	err = saveData()
+	err = saveState()
 	if err == nil {
 		fmt.Println("Data saved. Shutting down now. Cya")
 	} else {
 		fmt.Println("NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
 	}
 }
-func saveData() error {
-	for _, guild := range guilds {
-		err := ioutil.WriteFile(RAIDS_FILE_NAME, guild.Save(), os.ModeAppend)
-		if err != nil {
-			return err
-		}
+func saveState() error {
+	res, err := json.Marshal(guilds)
+	if err != nil {
+		return err
 	}
-	return nil
+	err = ioutil.WriteFile(RAIDS_FILE_NAME, res, 0600)
+	return err
 }
 
-func loadSavedData() {
-	oldRaids, err := ioutil.ReadFile(RAIDS_FILE_NAME)
+func loadSavedState() {
+	raids, err := ioutil.ReadFile(RAIDS_FILE_NAME)
 	if err != nil {
-		fmt.Println("No old raids were found.")
+		fmt.Println("No old raids were found." + err.Error())
 	}
-	if oldRaids != nil {
-		raids := strings.Split(fmt.Sprintf("%s", oldRaids), "\n")
-		for _, raid := range raids {
-			readRaidCommand(raid, true)
-		}
+
+	err = json.Unmarshal(raids, guilds)
+	if err != nil {
+		fmt.Println("Raids found but error while reading them: " + err.Error())
 	}
+	guilds.Eu.Location = euTime()
+	guilds.Us.Location = usTime()
 }
 
 func startSession() *discordgo.Session {
