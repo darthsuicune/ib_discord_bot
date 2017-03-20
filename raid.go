@@ -25,7 +25,8 @@ func (r Rancor) Times() []string {
 	}
 
 	if timeToStart == "finished" {
-		result[0] = "Rancor initial phase finished. Wait for FFA"
+		result[0] = "Rancor initial phase already started. " +
+			"Remember, single toon on the first 12h, only 0 damage attacks then til FFA"
 	} else {
 		start := formatTime(timeToStart)
 		result[0] = "Rancor " + start
