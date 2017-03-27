@@ -108,7 +108,7 @@ func loadSavedState() {
 }
 
 func startSession() *discordgo.Session {
-	token, err := ioutil.ReadFile("token.txt")
+	token, err := ioutil.ReadFile(TOKEN_FILE_NAME)
 	if err != nil {
 		panic(err)
 	}
@@ -173,9 +173,17 @@ func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
 }
 
 func canSetRaids(s *discordgo.Session, m *discordgo.Message) bool {
-	channel, _ := s.Channel(m.ChannelID)
+	channel, err := s.Channel(m.ChannelID)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
 	guildID := channel.GuildID
-	member, _ := s.GuildMember(guildID, m.Author.ID)
+	member, err := s.GuildMember(guildID, m.Author.ID)
+	if err != nil {
+		fmt.Println(err.Error())
+		return false
+	}
 	roles := member.Roles
 		
 	for _, role := range roles {
