@@ -51,7 +51,7 @@ func usTime() *time.Location {
 }
 
 func euTime() *time.Location {
-	l, err := time.LoadLocation("GMT")
+	l, err := time.LoadLocation("Europe/London")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -78,7 +78,7 @@ func (g *Guild) SetDefaultUSTank(startTime time.Time) {
 }
 
 func (g *Guild) SetUSTank(startTime time.Time) {
-	g.Tank = &Tank{StartTime: startTime, Phase2: startTime, Phase3: startTime, Phase4: startTime, Ffa: startTime.Add(46 * time.Hour)}
+	g.Tank = &Tank{StartTime: startTime, Phase2: startTime, Phase3: startTime, Phase4: startTime, Ffa: startTime.Add(24 * time.Hour)}
 }
 
 func (g *Guild) SetDefaultEUTank(startTime time.Time) {

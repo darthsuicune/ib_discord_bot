@@ -188,7 +188,7 @@ func canSetRaids(s *discordgo.Session, m *discordgo.Message) bool {
 		
 	for _, role := range roles {
 		r, _ := s.State.Role(guildID, role)
-		if r.Name == "Inglorious Leaders" || r.Name == "Inglorious Officers" {
+		if r.Name == "Inglorious Leaders" || r.Name == "Inglorious Officers" || r.Name == "US Officers" || r.Name == "EU Officers"{
 			return true
 		}
 	}
