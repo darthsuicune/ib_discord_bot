@@ -29,6 +29,7 @@ func (g *Guilds) Guild(code string) *Guild {
 type Guild struct {
 	Rancor *Rancor
 	Tank   *Tank
+	Sith   *Sith
 	Location *time.Location
 }
 
@@ -43,7 +44,7 @@ type Guild struct {
  */
 
 func usTime() *time.Location {
-	l, err := time.LoadLocation("EST")
+	l, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		fmt.Println(err)
 	}

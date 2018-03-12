@@ -29,7 +29,7 @@ var usTank = "Tank in **23h59m**\nFFA in **47h59m**\n"
 /**
  * DEFAULT
  */
-func TestDefaultRaidEUSetsUpTheDefault(t *testing.T) {
+func TestDefaultRancorEUSetsUpTheDefault(t *testing.T) {
 	command := fmt.Sprintf("!draid eu rancor %d-12-13", raidYear)
 	expectedBase := time.Date(raidYear, 12, 13, 20, 0, 0, 0, euTime())
 	expectedFfa := expectedBase.Add(24 * time.Hour)
@@ -44,7 +44,7 @@ func TestDefaultRaidEUSetsUpTheDefault(t *testing.T) {
 	}
 }
 
-func TestDefaultRaidUSSetsUpTheDefault(t *testing.T) {
+func TestDefaultTankUSSetsUpTheDefault(t *testing.T) {
 	command := fmt.Sprintf("!draid us tank %d-12-13", raidYear)
 	expectedBase := time.Date(raidYear, 12, 13, 22, 0, 0, 0, usTime())
 	expectedFfa := expectedBase.Add(46 * time.Hour)

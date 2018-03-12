@@ -8,7 +8,8 @@ import (
 )
 
 var g *Guild
-var testYear = time.Now().Add(366 * 24 * time.Hour).Year()
+var testYear = time.Now().Year() + 1
+var pastYear = 2015
 
 func init() {
 	g = createGuild()
@@ -18,8 +19,24 @@ func createGuild() *Guild {
 	return &Guild{}
 }
 
+func TestTimeZones(t *testing.T) {
+	british, err := time.LoadLocation("Europe/London")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	eu, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Error(err.Error())
+	}
+	timing := time.Date(testYear, 2, 3, 4, 5, 6, 7, eu).Add(1 * time.Hour)
+	expected := time.Date(testYear,2,3,4,5,6,7, british)
+	if !timing.Equal(expected) {
+		t.Error("Times aren't equal. Got: " + timing.String() + ", expected: " + expected.String())
+	}
+}
+
 func TestRaidFinished(t *testing.T) {
-	timing := time.Date(2006, 1, 2, 15, 04, 05, 0, usTime())
+	timing := time.Date(pastYear, 1, 2, 15, 04, 05, 0, usTime())
 
 	g.SetDefaultUSRancor(timing)
 
@@ -88,7 +105,7 @@ func TestSetDefaultUSTank(t *testing.T) {
 	if tank[0] != fmt.Sprintf("Tank in **%s**", expectedStart) {
 		t.Error("Wrong start time: " + tank[0] + ", expected: " + expectedStart)
 	}
-	expectedFfa := trimTime(expectedTiming.Add(46 * time.Hour).Sub(time.Now()).String())
+	expectedFfa := trimTime(expectedTiming.Add(24 * time.Hour).Sub(time.Now()).String())
 	if tank[1] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
 		t.Error("Wrong ffa time: " + tank[1] + ", expected: " + expectedFfa)
 	}

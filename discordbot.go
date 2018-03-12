@@ -162,17 +162,17 @@ func lando(s *discordgo.Session, m *discordgo.Message) string {
 }
 
 func parseDefaultRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
-	if !canSetRaids(s, m) {
+	if !hasPermissionToSetRaids(s, m) {
 		return "Nope"
 	}
 	return setDefaultRaid(m.Content)
 }
 
 func parseRaidCommand(s *discordgo.Session, m *discordgo.Message) string {
-	return readRaidCommand(m.Content, canSetRaids(s, m))
+	return readRaidCommand(m.Content, hasPermissionToSetRaids(s, m))
 }
 
-func canSetRaids(s *discordgo.Session, m *discordgo.Message) bool {
+func hasPermissionToSetRaids(s *discordgo.Session, m *discordgo.Message) bool {
 	channel, err := s.Channel(m.ChannelID)
 	if err != nil {
 		fmt.Println(err.Error())

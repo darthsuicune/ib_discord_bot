@@ -84,6 +84,10 @@ func (t Tank) String() string {
 	return strings.Join(times, "\n")
 }
 
+type Sith struct {
+	StartTime time.Time
+}
+
 func timeTilEvent(when time.Time) string {
 	waitTime := when.Sub(time.Now())
 	if waitTime < -5*time.Minute {

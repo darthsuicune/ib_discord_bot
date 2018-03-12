@@ -9,7 +9,7 @@ import (
 func TestPastStartTime(t *testing.T) {
 	r := Rancor{StartTime: time.Now().Add(-10 * time.Minute), Ffa: time.Now().Add(24 * time.Hour)}
 	ti := r.Times()
-	if ti[0] != "Rancor initial phase finished. Wait for FFA" {
+	if ti[0] != "Rancor initial phase already started. Remember, single toon on the first 12h, only 0 damage attacks then til FFA" {
 		t.Error("wrong start time: " + ti[0])
 	}
 }
