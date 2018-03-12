@@ -16,17 +16,28 @@ type Rancor struct {
 }
 
 func (r Rancor) Times() []string {
+	result := make([]string, 2)
 	timeToStart := timeTilEvent(r.StartTime)
-	timeToEnd := timeTilEvent(r.Ffa)
+	timeToFfa := timeTilEvent(r.Ffa)
 
-	start := formatTime(timeToStart)
-	end := formatTime(timeToEnd)
-	res := []string{"Rancor " + start, "FFA " + end}
-	return res
+	if timeToFfa == "finished" {
+		return []string{"The rancor has finished! Inglorious Officers, what's up with that?!"}
+	}
+
+	if timeToStart == "finished" {
+		result[0] = "Rancor initial phase already started. " +
+			"Remember, single toon on the first 12h, only 0 damage attacks then til FFA"
+	} else {
+		start := formatTime(timeToStart)
+		result[0] = "Rancor " + start
+	}
+	end := formatTime(timeToFfa)
+	result[1] = "FFA " + end
+	return result
 }
 
 func (r Rancor) String() string {
-	return ""
+	return strings.Join(r.Times(), "\n")
 }
 
 type Tank struct {
@@ -41,15 +52,25 @@ func (t Tank) Times() []string {
 	timeToStart := timeTilEvent(t.StartTime)
 	timeToFfa := timeTilEvent(t.Ffa)
 
-	start := "Tank " + formatTime(timeToStart)
+	if timeToFfa == "finished" {
+		return []string{"The tank has finished! Inglorious Officers, what's up with that?!"}
+	}
+
+	var start string
+	if timeToStart == "finished" {
+		start = "The tank has already started."
+	} else {
+		start = "Tank " + formatTime(timeToStart)
+	}
+
 	ffa := "FFA " + formatTime(timeToFfa)
 
 	if t.Phase2.Equal(t.StartTime) {
 		return []string{start, ffa}
 	} else {
-		timeToP2 := timeTilEvent(t.Phase2)
-		timeToP3 := timeTilEvent(t.Phase3)
 		timeToP4 := timeTilEvent(t.Phase4)
+		timeToP3 := timeTilEvent(t.Phase3)
+		timeToP2 := timeTilEvent(t.Phase2)
 
 		p2 := "Phase 2 " + formatTime(timeToP2)
 		p3 := "Phase 3 " + formatTime(timeToP3)
@@ -59,17 +80,24 @@ func (t Tank) Times() []string {
 }
 
 func (t Tank) String() string {
-	return ""
+	times := t.Times()
+	return strings.Join(times, "\n")
 }
 
 func timeTilEvent(when time.Time) string {
-	waitTime := when.Sub(time.Now()).String()
-	minuteMark := strings.LastIndex(waitTime, "m") + 1
-	return waitTime[0:minuteMark]
+	waitTime := when.Sub(time.Now())
+	if waitTime < -5*time.Minute {
+		return "finished"
+	}
+	wait := waitTime.String()
+	minuteMark := strings.LastIndex(wait, "m") + 1
+	return wait[0:minuteMark]
 }
 
 func formatTime(timeToFormat string) string {
-	if timeToFormat != "" {
+	if timeToFormat == "finished" {
+		return "already started"
+	} else if timeToFormat != "" {
 		return "in **" + timeToFormat + "**"
 	} else {
 		return "**NOW!**"

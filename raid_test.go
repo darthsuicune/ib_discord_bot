@@ -6,6 +6,38 @@ import (
 	"time"
 )
 
+func TestPastStartTime(t *testing.T) {
+	r := Rancor{StartTime: time.Now().Add(-10 * time.Minute), Ffa: time.Now().Add(24 * time.Hour)}
+	ti := r.Times()
+	if ti[0] != "Rancor initial phase finished. Wait for FFA" {
+		t.Error("wrong start time: " + ti[0])
+	}
+}
+
+func TestPastFfaTime(t *testing.T) {
+	r := Rancor{StartTime: time.Now().Add(-10 * time.Minute).Add(-24 * time.Hour), Ffa: time.Now().Add(-10 * time.Minute)}
+	ti := r.Times()
+	if ti[0] != "The rancor has finished! Inglorious Officers, what's up with that?!" {
+		t.Error("wrong end time: " + ti[0])
+	}
+}
+
+func TestTankPastStartTime(t *testing.T) {
+	r := Tank{StartTime: time.Now().Add(-10 * time.Minute), Ffa: time.Now().Add(24 * time.Hour)}
+	ti := r.Times()
+	if ti[0] != "The tank has already started." {
+		t.Error("wrong start time: " + ti[0])
+	}
+}
+
+func TestTankPastFfaTime(t *testing.T) {
+	r := Tank{StartTime: time.Now().Add(-10 * time.Minute).Add(-24 * time.Hour), Ffa: time.Now().Add(-10 * time.Minute)}
+	ti := r.Times()
+	if ti[0] != "The tank has finished! Inglorious Officers, what's up with that?!" {
+		t.Error("wrong end time: " + ti[0])
+	}
+}
+
 func TestRancorReturnsProperTiming(t *testing.T) {
 	r := createRancor()
 	ti := r.Times()
@@ -13,10 +45,10 @@ func TestRancorReturnsProperTiming(t *testing.T) {
 		t.Error("Invalid data returned: " + strings.Join(ti, ", "))
 	}
 	if ti[0] != "Rancor **NOW!**" {
-		t.Error("wrong start time returned: " + ti[0])
+		t.Error("wrong start time: " + ti[0])
 	}
 	if ti[1] != "FFA in **23h59m**" {
-		t.Error("wrong end time returned: " + ti[1])
+		t.Error("wrong end time: " + ti[1])
 	}
 }
 
