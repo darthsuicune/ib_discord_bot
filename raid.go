@@ -88,6 +88,23 @@ type Sith struct {
 	StartTime time.Time
 }
 
+func (s Sith) Times() []string {
+	timeToStart := timeTilEvent(s.StartTime)
+
+	if timeToStart == "finished" {
+		return []string{"Rancor already started. Give it all you got!"}
+	} else {
+		start := formatTime(timeToStart)
+		return []string {"Sith " + start}
+	}
+	return []string{timeToStart}
+}
+
+func (s Sith) String() string {
+	times := s.Times()
+	return strings.Join(times, "\n")
+}
+
 func timeTilEvent(when time.Time) string {
 	waitTime := when.Sub(time.Now())
 	if waitTime < -5*time.Minute {
