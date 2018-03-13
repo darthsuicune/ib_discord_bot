@@ -92,7 +92,7 @@ func (s Sith) Times() []string {
 	timeToStart := timeTilEvent(s.StartTime)
 
 	if timeToStart == "finished" {
-		return []string{"Rancor already started. Give it all you got!"}
+		return []string{"Sith already started. Give it all you got!"}
 	} else {
 		start := formatTime(timeToStart)
 		return []string {"Sith " + start}
