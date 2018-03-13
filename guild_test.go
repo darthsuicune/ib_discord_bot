@@ -123,7 +123,7 @@ func TestSetUSTank(t *testing.T) {
 	if tank[0] != fmt.Sprintf("Tank in **%s**", expectedStart) {
 		t.Error("Wrong start time: " + tank[0] + ", expected: " + expectedStart)
 	}
-	expectedFfa := trimTime(timing.Add(46 * time.Hour).Sub(time.Now()).String())
+	expectedFfa := trimTime(timing.Add(24 * time.Hour).Sub(time.Now()).String())
 	if tank[1] != fmt.Sprintf("FFA in **%s**", expectedFfa) {
 		t.Error("Wrong ffa time: " + tank[1] + ", expected: " + expectedFfa)
 	}

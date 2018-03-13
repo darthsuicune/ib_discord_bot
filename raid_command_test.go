@@ -47,7 +47,7 @@ func TestDefaultRancorEUSetsUpTheDefault(t *testing.T) {
 func TestDefaultTankUSSetsUpTheDefault(t *testing.T) {
 	command := fmt.Sprintf("!draid us tank %d-12-13", raidYear)
 	expectedBase := time.Date(raidYear, 12, 13, 22, 0, 0, 0, usTime())
-	expectedFfa := expectedBase.Add(46 * time.Hour)
+	expectedFfa := expectedBase.Add(24 * time.Hour)
 	base := trimTime(expectedBase.Sub(time.Now()).String())
 	ffa := trimTime(expectedFfa.Sub(time.Now()).String())
 	expectedResponse := fmt.Sprintf("Tank in **%s**\nFFA in **%s**", base, ffa)
@@ -155,7 +155,7 @@ func TestRaidSetsUpTheRightValue(t *testing.T) {
 func TestUSRaidSetsUpTheRightValue(t *testing.T) {
 	command := fmt.Sprintf("!raid set us tank %d-12-13 01:02 EST", raidYear)
 	expectedTiming := time.Date(raidYear, 12, 13, 1, 2, 0, 0, usTime())
-	expectedFfa := expectedTiming.Add(46 * time.Hour)
+	expectedFfa := expectedTiming.Add(24 * time.Hour)
 
 	readRaidCommand(command, true)
 
@@ -191,8 +191,21 @@ func TestDeleteRaidRemovesTheCurrentRaid(t *testing.T) {
 }
 
 func TestParsingHourOutOfRange(t *testing.T) {
-	command := "!raid set us rancor 2017-03-14 20:30 EST"
-	expectedDate := time.Date(2017, 3, 14, 20, 30, 0, 0, usTime())
+	command := "!raid set us rancor 2017-01-14 20:30 EST"
+	expectedDate := time.Date(2017, 1, 14, 20, 30, 0, 0, usTime())
+
+	readRaidCommand(command, true)
+
+	if guilds.Us.Rancor == nil {
+		t.Error("Raid not set")
+	}
+
+	if !guilds.Us.Rancor.StartTime.Equal(expectedDate) {
+		t.Error("Dates don't match: " + guilds.Us.Rancor.StartTime.String() + " but expected: " + expectedDate.String())
+	}
+
+	command = "!raid set us rancor 2017-05-14 20:30 EDT"
+	expectedDate = time.Date(2017, 5, 14, 20, 30, 0, 0, usTime())
 
 	readRaidCommand(command, true)
 
